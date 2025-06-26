@@ -1,0 +1,770 @@
+/* AI Concept Highlighter Extension Styles */
+
+/* Floating Icon Styles */
+.ai-concept-floating-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  cursor: grab;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: none;
+}
+
+.ai-concept-floating-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Click ready state */
+.ai-concept-floating-icon:hover::after {
+  content: "Click";
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  animation: ai-concept-tooltip-show 0.3s ease-out 0.5s forwards;
+}
+
+@keyframes ai-concept-tooltip-show {
+  from { opacity: 0; transform: translateX(-50%) translateY(5px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.ai-concept-floating-icon:active,
+.ai-concept-floating-icon.ai-concept-dragging {
+  cursor: grabbing;
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  z-index: 10001;
+}
+
+.ai-concept-floating-icon::before {
+  content: "🧠";
+  font-size: 24px;
+  color: white;
+  pointer-events: none;
+}
+
+/* Drag indicator */
+.ai-concept-drag-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: #667eea;
+  font-weight: bold;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  letter-spacing: -1px;
+}
+
+.ai-concept-floating-icon:hover .ai-concept-drag-indicator {
+  opacity: 1;
+}
+
+.ai-concept-floating-icon.ai-concept-dragging .ai-concept-drag-indicator {
+  opacity: 0;
+}
+
+/* Dragging animation */
+.ai-concept-floating-icon.ai-concept-dragging {
+  transition: none;
+  animation: ai-concept-drag-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes ai-concept-drag-pulse {
+  0% {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+  }
+}
+
+/* Mobile touch improvements */
+@media (max-width: 768px) {
+  .ai-concept-floating-icon {
+    width: 55px;
+    height: 55px;
+  }
+
+  .ai-concept-floating-icon::before {
+    font-size: 26px;
+  }
+}
+
+/* Configuration Modal Styles */
+.ai-concept-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-concept-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.ai-concept-modal h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.ai-concept-form-group {
+  margin-bottom: 20px;
+}
+
+.ai-concept-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500;
+}
+
+.ai-concept-form-group input,
+.ai-concept-form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.ai-concept-form-group input:focus,
+.ai-concept-form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.ai-concept-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.ai-concept-button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.ai-concept-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.ai-concept-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.ai-concept-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.ai-concept-btn-secondary {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.ai-concept-btn-secondary:hover {
+  background: #e9ecef;
+}
+
+.ai-concept-btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.ai-concept-btn-success:hover {
+  background: #218838;
+}
+
+.ai-concept-btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.ai-concept-btn-danger:hover {
+  background: #c82333;
+}
+
+.ai-concept-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-concept-close-btn:hover {
+  color: #333;
+}
+
+/* Highlighting Styles */
+.ai-concept-highlight {
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin: 0 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline;
+  /* Background and border colors will be set dynamically via JavaScript */
+}
+
+.ai-concept-highlight:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  filter: brightness(0.95);
+}
+
+/* Relevance-specific styles */
+.ai-concept-highlight[data-relevance="high"] {
+  font-weight: bold;
+  text-decoration: underline;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.ai-concept-highlight[data-relevance="medium"] {
+  text-decoration: underline;
+}
+
+.ai-concept-highlight[data-relevance="low"] {
+  /* Only background color, no additional styling */
+}
+
+.ai-concept-highlight::after {
+  content: "🎯";
+  position: absolute;
+  top: -20px;
+  right: -5px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ai-concept-highlight:hover::after {
+  opacity: 1;
+}
+
+/* Status Messages */
+.ai-concept-status {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.ai-concept-status-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.ai-concept-status-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.ai-concept-status-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+/* Loading Animation */
+.ai-concept-loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: ai-concept-spin 1s linear infinite;
+}
+
+@keyframes ai-concept-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Toggle Switch */
+.ai-concept-toggle {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.ai-concept-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ai-concept-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.ai-concept-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.ai-concept-toggle input:checked + .ai-concept-toggle-slider {
+  background-color: #667eea;
+}
+
+.ai-concept-toggle input:checked + .ai-concept-toggle-slider:before {
+  transform: translateX(26px);
+}
+
+/* Dynamic Concept Fields */
+.ai-concept-field-group {
+  margin-bottom: 10px;
+}
+
+.ai-concept-field-group:last-child {
+  margin-bottom: 0;
+}
+
+.ai-concept-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.ai-concept-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.ai-concept-color-picker {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  flex-shrink: 0;
+  min-width: 32px;
+  max-width: 32px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: transparent;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ai-concept-color-picker:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.ai-concept-color-picker::-webkit-color-swatch-wrapper {
+  padding: 1px !important;
+  border: none !important;
+  border-radius: 5px !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.ai-concept-color-picker::-webkit-color-swatch {
+  border: none !important;
+  border-radius: 4px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ai-concept-color-picker::-moz-color-swatch {
+  border: none !important;
+  border-radius: 4px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ai-concept-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.ai-concept-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.ai-concept-remove-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.ai-concept-remove-btn:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+.ai-concept-remove-btn:active {
+  transform: scale(0.95);
+}
+
+#ai-concept-add-concept {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  color: #6c757d;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+#ai-concept-add-concept:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+/* Concept field animations */
+.ai-concept-field-group {
+  animation: ai-concept-field-slide-in 0.3s ease-out;
+}
+
+@keyframes ai-concept-field-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+/* Summary Panel Styles */
+.ai-concept-summary-panel {
+  position: fixed;
+  width: 350px;
+  max-height: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  z-index: 10002;
+  border: 1px solid #e1e5e9;
+  overflow: hidden;
+  animation: ai-concept-summary-slide-in 0.3s ease-out;
+}
+
+@keyframes ai-concept-summary-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ai-concept-summary-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ai-concept-summary-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-concept-summary-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ai-concept-summary-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-concept-summary-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.ai-concept-summary-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.ai-concept-summary-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.ai-concept-summary-concepts {
+  background: #f8f9fa;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  border-left: 3px solid #667eea;
+}
+
+.ai-concept-concepts-text {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.ai-concept-summary-content-area {
+  margin-bottom: 15px;
+}
+
+.ai-concept-summary-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background: #fafbfc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+  min-height: 120px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ai-concept-summary-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667eea;
+  font-style: italic;
+  min-height: 60px;
+}
+
+.ai-concept-summary-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-concept-refresh-summary {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.ai-concept-highlight-concepts {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* Responsive adjustments for summary panel */
+@media (max-width: 768px) {
+  .ai-concept-summary-panel {
+    width: 90vw;
+    max-width: 350px;
+    left: 5vw !important;
+    right: 5vw !important;
+  }
+}
+
+/* Summary panel positioning adjustments */
+.ai-concept-summary-panel.ai-concept-summary-left {
+  transform-origin: top right;
+}
+
+.ai-concept-summary-panel.ai-concept-summary-right {
+  transform-origin: top left;
+}
+
+/* Relevance Legend */
+.ai-concept-relevance-legend {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.ai-concept-legend-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.ai-concept-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-concept-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.ai-concept-legend-sample {
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: #e3f2fd;
+  border-left: 3px solid #667eea;
+  font-size: 10px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.ai-concept-legend-high {
+  font-weight: bold;
+  text-decoration: underline;
+  border-left-width: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ai-concept-legend-medium {
+  text-decoration: underline;
+  border-left-width: 3px;
+}
+
+.ai-concept-legend-low {
+  border-left-width: 2px;
+}
