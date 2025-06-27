@@ -658,17 +658,19 @@ class AIConceptHighlighter {
         const allInputs = container.querySelectorAll('.ai-concept-input');
         const lastInput = allInputs[allInputs.length - 1];
 
-        // Only add field if this is the last input and has meaningful content
-        if (e.target === lastInput && e.target.value.trim().length > 2) {
-          // Check if there isn't already an empty field at the end
-          const hasEmptyField = Array.from(allInputs).some(input => input.value.trim() === '');
-          if (!hasEmptyField) {
+        // Only add field if this is the last input, has meaningful content, and no empty fields exist
+        if (e.target === lastInput && e.target.value.trim().length > 3) {
+          // Check if there are any empty fields
+          const emptyFields = Array.from(allInputs).filter(input => input.value.trim() === '');
+
+          // Only add if no empty fields exist and we don't have too many fields
+          if (emptyFields.length === 0 && allInputs.length < 10) {
             this.addConceptField();
           }
         }
 
         this.updateRemoveButtons();
-      }, 800); // Increased delay to 800ms
+      }, 1200); // Increased delay to 1200ms for more stability
     });
 
     // Remove concept
@@ -682,6 +684,32 @@ class AIConceptHighlighter {
         input.focus();
       }, 100);
     }
+
+    // Prevent auto-addition when field is focused but empty
+    input.addEventListener('focus', () => {
+      if (addFieldTimeout) {
+        clearTimeout(addFieldTimeout);
+      }
+    });
+
+    // Clean up empty fields when losing focus (except the last one)
+    input.addEventListener('blur', () => {
+      setTimeout(() => {
+        const allInputs = container.querySelectorAll('.ai-concept-input');
+        const emptyInputs = Array.from(allInputs).filter(inp => inp.value.trim() === '');
+
+        // Keep at least one empty field, remove others
+        if (emptyInputs.length > 1) {
+          emptyInputs.slice(0, -1).forEach(emptyInput => {
+            const fieldGroup = emptyInput.closest('.ai-concept-field-group');
+            if (fieldGroup) {
+              fieldGroup.remove();
+            }
+          });
+          this.updateRemoveButtons();
+        }
+      }, 200); // Small delay to allow for field switching
+    });
 
     this.updateRemoveButtons();
 
@@ -1265,7 +1293,7 @@ class AIConceptHighlighter {
           .join('\n\n');
       }
 
-      // Combine all content with clear sections
+      // Combine all content with clear sections - NO TRUNCATION
       const combinedContent = [
         patentContent.title ? `TITLE:\n${patentContent.title}\n` : '',
         patentContent.abstract ? `ABSTRACT:\n${patentContent.abstract}\n` : '',
@@ -1273,13 +1301,18 @@ class AIConceptHighlighter {
         patentContent.description ? `DESCRIPTION:\n${patentContent.description}` : ''
       ].filter(section => section.length > 0).join('\n\n');
 
-      console.log('Google Patents content extracted:', {
+      console.log('🔍 GOOGLE PATENTS: Full content extracted (NO TRUNCATION):', {
         titleLength: patentContent.title.length,
         abstractLength: patentContent.abstract.length,
         claimsLength: patentContent.claims.length,
         descriptionLength: patentContent.description.length,
-        totalLength: combinedContent.length
+        totalLength: combinedContent.length,
+        willUseMultipleQueries: combinedContent.length > 30000
       });
+
+      if (combinedContent.length > 30000) {
+        console.log('📄 Large patent content detected - will use multiple AI queries for complete analysis');
+      }
 
       return combinedContent || 'No patent content found';
 

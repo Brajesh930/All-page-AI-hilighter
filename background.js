@@ -169,6 +169,186 @@ async function handleContentAnalysis(data, sendResponse) {
   }
 }
 
+// Analyze large content with multiple queries
+async function analyzeWithMultipleQueries(content, concepts, apiKey, maxChunkSize) {
+  console.log('🔄 MULTIPLE QUERIES: Starting analysis with content splitting');
+
+  // Split content into manageable chunks
+  const chunks = splitContentIntoChunks(content, maxChunkSize);
+  console.log(`📊 Split content into ${chunks.length} chunks`);
+
+  const allHighlights = [];
+  const allConceptsFound = new Set();
+
+  // Process each chunk
+  for (let i = 0; i < chunks.length; i++) {
+    console.log(`🔍 Processing chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)`);
+
+    try {
+      const chunkResult = await analyzeSingleChunk(chunks[i], concepts, apiKey, i + 1);
+
+      if (chunkResult.highlights) {
+        allHighlights.push(...chunkResult.highlights);
+      }
+
+      if (chunkResult.conceptsFound) {
+        chunkResult.conceptsFound.forEach(concept => allConceptsFound.add(concept));
+      }
+
+      // Add delay between requests to avoid rate limiting
+      if (i < chunks.length - 1) {
+        console.log('⏳ Waiting 1 second before next chunk...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+    } catch (error) {
+      console.error(`❌ Error processing chunk ${i + 1}:`, error);
+      // Continue with other chunks even if one fails
+    }
+  }
+
+  console.log(`✅ MULTIPLE QUERIES COMPLETE: Found ${allHighlights.length} total highlights`);
+
+  return {
+    highlights: allHighlights.slice(0, 50), // Limit total highlights
+    conceptsFound: Array.from(allConceptsFound)
+  };
+}
+
+// Split content into chunks while preserving section boundaries
+function splitContentIntoChunks(content, maxChunkSize) {
+  const chunks = [];
+
+  // For Google Patents, try to split by sections first
+  if (content.includes('TITLE:') && content.includes('ABSTRACT:')) {
+    const sections = content.split(/\n\n(?=TITLE:|ABSTRACT:|CLAIMS:|DESCRIPTION:)/);
+
+    let currentChunk = '';
+    for (const section of sections) {
+      if (currentChunk.length + section.length > maxChunkSize && currentChunk.length > 0) {
+        chunks.push(currentChunk.trim());
+        currentChunk = section;
+      } else {
+        currentChunk += (currentChunk ? '\n\n' : '') + section;
+      }
+    }
+
+    if (currentChunk.trim()) {
+      chunks.push(currentChunk.trim());
+    }
+  } else {
+    // For regular content, split by paragraphs
+    const paragraphs = content.split('\n\n');
+    let currentChunk = '';
+
+    for (const paragraph of paragraphs) {
+      if (currentChunk.length + paragraph.length > maxChunkSize && currentChunk.length > 0) {
+        chunks.push(currentChunk.trim());
+        currentChunk = paragraph;
+      } else {
+        currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
+      }
+    }
+
+    if (currentChunk.trim()) {
+      chunks.push(currentChunk.trim());
+    }
+  }
+
+  return chunks.filter(chunk => chunk.length > 0);
+}
+
+// Analyze a single chunk
+async function analyzeSingleChunk(chunk, concepts, apiKey, chunkNumber) {
+  console.log(`🤖 CHUNK ${chunkNumber}: Analyzing ${chunk.length} characters`);
+
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
+  const prompt = `
+    Analyze the following text chunk and identify segments that are related to these concepts: ${concepts.join(', ')}.
+
+    This is chunk ${chunkNumber} of a larger document. Focus on finding relevant content within this section.
+
+    For each relevant text segment, provide:
+    1. The exact text that should be highlighted (keep it concise, max 100 characters)
+    2. Which concept(s) it relates to
+    3. A brief explanation of the relevance
+    4. A relevance score: "high", "medium", or "low"
+
+    Relevance scoring guidelines:
+    - HIGH: Direct mentions, key definitions, core examples, primary focus areas
+    - MEDIUM: Related discussions, supporting examples, indirect references
+    - LOW: Tangential mentions, background context, minor connections
+
+    Important guidelines:
+    - Only highlight text that is directly and clearly related to the concepts
+    - Prefer shorter, more specific text segments over long paragraphs
+    - Avoid highlighting common words or phrases unless they're specifically relevant
+    - Maximum 15 highlights per chunk
+    - Be precise with relevance scoring
+
+    Return the response as a JSON object with this structure:
+    {
+      "highlights": [
+        {
+          "text": "exact text to highlight",
+          "concepts": ["related concept 1", "related concept 2"],
+          "explanation": "brief explanation",
+          "relevance": "high|medium|low"
+        }
+      ],
+      "conceptsFound": ["concept1", "concept2"]
+    }
+
+    Text chunk to analyze:
+    ${chunk}
+  `;
+
+  const requestBody = {
+    contents: [{
+      parts: [{
+        text: prompt
+      }]
+    }],
+    generationConfig: {
+      temperature: 0.1,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 2048,
+    }
+  };
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error for chunk ${chunkNumber}: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const responseText = data.candidates[0].content.parts[0].text;
+
+  // Parse JSON response
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.warn(`⚠️ No JSON found in chunk ${chunkNumber} response`);
+    return { highlights: [], conceptsFound: [] };
+  }
+
+  const result = JSON.parse(jsonMatch[0]);
+  console.log(`✅ CHUNK ${chunkNumber}: Found ${result.highlights?.length || 0} highlights`);
+
+  return {
+    highlights: result.highlights || [],
+    conceptsFound: result.conceptsFound || []
+  };
+}
+
 // Analyze content with Google Gemini AI
 async function analyzeWithGemini(content, concepts, apiKey) {
   console.log('🤖 GEMINI AI: Starting analysis');
@@ -198,17 +378,26 @@ async function analyzeWithGemini(content, concepts, apiKey) {
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
   console.log('🌐 API URL (without key):', apiUrl.replace(/key=.*$/, 'key=***'));
 
-  // Limit content length to avoid API limits and improve performance
-  const maxContentLength = 8000;
-  const truncatedContent = content.length > maxContentLength
-    ? content.substring(0, maxContentLength) + '...'
-    : content;
+  // Check if this is Google Patents content (don't truncate)
+  const isGooglePatents = content.includes('TITLE:') && content.includes('ABSTRACT:') && content.includes('CLAIMS:');
+
+  // Set content length limits based on content type
+  const maxContentLength = isGooglePatents ? 30000 : 8000; // Larger limit for patents
 
   console.log('✂️ Content processing:', {
     originalLength: content.length,
-    truncatedLength: truncatedContent.length,
-    wasTruncated: content.length > maxContentLength
+    isGooglePatents: isGooglePatents,
+    maxAllowed: maxContentLength,
+    needsMultipleQueries: content.length > maxContentLength
   });
+
+  // If content is too large, split into multiple queries
+  if (content.length > maxContentLength) {
+    console.log('📄 Content too large, splitting into multiple queries...');
+    return await analyzeWithMultipleQueries(content, concepts, apiKey, maxContentLength);
+  }
+
+  const truncatedContent = content;
 
   const prompt = `
     Analyze the following text and identify segments that are related to these concepts: ${concepts.join(', ')}.
@@ -226,8 +415,8 @@ async function analyzeWithGemini(content, concepts, apiKey) {
 
     Important guidelines:
     - Only highlight text that is directly and clearly related to the concepts
-    - Prefer shorter, more specific text segments over long paragraphs
     - Avoid highlighting common words or phrases unless they're specifically relevant
+    - Prefer shorter, more specific text segments over long paragraphs
     - Maximum 20 highlights per analysis
     - Be precise with relevance scoring
 

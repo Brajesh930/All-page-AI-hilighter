@@ -96,13 +96,17 @@ The extension provides specialized support for Google Patents pages with intelli
 - **Title**: Patent title and main heading
 - **Abstract**: Patent abstract and summary
 - **Claims**: All patent claims (independent and dependent)
-- **Description**: Detailed technical description and background
+- **Description**: Complete detailed technical description and background
+- **No Truncation**: Full patent content analyzed without cutting text
+- **Multiple Queries**: Automatically splits large patents into multiple AI queries for complete analysis
 
 ### **Benefits for Patent Analysis**
 - **Focused Analysis**: Only analyzes relevant patent content, ignoring navigation and metadata
 - **Comprehensive Coverage**: Captures all key patent sections for thorough concept analysis
+- **Complete Analysis**: No content truncation - analyzes entire patent documents
+- **Multiple Query Support**: Automatically handles large patents by splitting into multiple AI queries
 - **Improved Accuracy**: Better AI analysis results due to structured, relevant content input
-- **Efficient Processing**: Faster analysis by excluding irrelevant page elements
+- **Efficient Processing**: Smart content splitting preserves section boundaries for optimal analysis
 
 ## 🛠️ Technical Details
 
